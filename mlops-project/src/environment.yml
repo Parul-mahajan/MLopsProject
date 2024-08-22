@@ -1,0 +1,12 @@
+name: myenv
+dependencies:
+- python=3.12
+- numpy
+- pip
+- pandas
+- pip:
+  - scikit-learn
+  - azureml-core
+  - azureml-inference-server-http
+  - pandas
+  - setuptools

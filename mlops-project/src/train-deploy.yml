@@ -1,0 +1,48 @@
+trigger:
+- dev
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  RESOURCE_GROUP: 'mlops'
+  WORKSPACE_NAME: 'mlopsworkspace'
+  LOCATION: 'centralindia'
+
+steps:
+
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'MLOPS'
+    scriptType: 'pscore'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az account show
+      az extension add --name ml
+      az ml workspace show --name $(WORKSPACE_NAME) --resource-group $(RESOURCE_GROUP)
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'
+    addToPath: true
+
+- script: |
+    az login --service-principal -u "<CLIENT_ID>" -p "<CLIENT_SECRET>" --tenant "<TENANT_ID>"
+    python -m venv venv
+    source venv/bin/activate
+    pip install --upgrade pip
+    pip install azureml-sdk
+    pip install azureml-core
+    pip install setuptools
+  displayName: 'Set up Python Environment'
+- script: |
+    source venv/bin/activate    
+    python mlops-project/src/train-compute.py
+  displayName: 'Train Model on Compute Cluster'
+
+- script: |
+    source venv/bin/activate 
+    python -c "import numpy; print(numpy.__version__)"
+    python mlops-project/src/deploy.py
+  displayName: 'Deploy Model to AKS'
+
+

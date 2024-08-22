@@ -1,0 +1,6 @@
+numpy
+scikit-learn
+azureml-inference-server-http
+pandas
+azureml-sdk
+sklearn
